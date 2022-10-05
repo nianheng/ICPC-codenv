@@ -20,7 +20,20 @@ int main() {
     int T; cin >> T;
     while(T--) {
         int n; cin >> n;
-        printf("%d\n", (n-6)/3);
+        int x; cin >> x;
+        if(n == 1) {
+            printf("0\n");
+            continue;
+        }
+        n--;
+        x = x*2-1;
+        ll Ans = 0;
+        for(int i=1; i<=n; i++) {
+            int y; cin >> y;
+            if(y <= x) continue;
+            Ans += (y-1)/x;
+        }
+        printf("%lld\n", Ans);
     }
     return 0;
 }
