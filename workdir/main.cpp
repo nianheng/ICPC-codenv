@@ -1,61 +1,48 @@
 #include<bits/stdc++.h>
 
-using ld = long double;
+#define mp(x, y) make_pair(x, y)
+#define qmin(x, y) (x = min(x, y))
+#define qmax(x, y) (x = max(x, y))
+
+using ll = long long;
 using namespace std;
 
-struct seg {
-    ld x, y;
-    explicit seg(ld X = 0, ld Y = 0) : x(X), y(Y){};
-};
+typedef pair<int, int> pii;
+typedef array<int, 2> arr;
 
-bool operator < (const seg &A, const seg &B) {
-    return A.x/A.y < B.x/B.y;
-}
+const ll inf = 1e14;
 
-void solve() {
-    int n; ld A, B;
-    cin >> n >> A >> B;
-    vector<seg> p(n);
-    for(auto &[x, y] : p)
-        cin >> x;
-    for(auto &[x, y] : p)
-        cin >> y;
-    ld ax = A, ay = B;
-    ld bx = A, by = B;
-    multiset<seg> q;
-    for(auto &[x, y] : p) {
-        q.insert(seg(2*x, 2*y));
-        ax -= x, ay += y;
-        while(ax < 0) {
-            auto [X, Y] = *q.rbegin();
-            q.erase(prev(q.end()));
-            if(ax + X <= 0) {
-                ax += X;
-                ay -= Y;
-                continue;
-            }
-            ld k = -ax / X;
-            ax = 0;
-            ay -= k * Y;
-            q.insert(seg(X*(1-k), Y*(1-k)));
-            break;
-        }
-        bx += x, by -= y;
-        while(by < 0) {
-            auto [X, Y] = *q.begin(); q.erase(q.begin());
-            if(by + Y <= 0) {
-                bx -= X;
-                by += Y;
-                continue;
-            }
-            ld k = -by / Y;
-            by = 0;
-            bx -= k * X;
-            q.insert(seg(X*(1-k), Y*(1-k)));
-            break;
-        }
-        printf("%.7Lf\n", bx);
+//const int maxn = ;
+//const ll P = ;
+
+inline void solve() {
+    int n, m; cin >> n >> m;
+    vector<vector<ll> > f(n, vector<ll>(n, inf));
+    vector<vector<ll> > g(n, vector<ll>(n, inf));
+    for(int i=0; i<m; i++) {
+        int x, y; ll z; cin >> x >> y >> z;
+        x--, y--;
+        qmin(f[x][y], z);
+        qmin(f[y][x], z);
+        g[x][y] = g[y][x] = 1;
     }
+    for(int x=0; x<n; x++)
+        g[x][x] = 0;
+    for(int k=0; k<n; k++)
+        for(int x=0; x<n; x++)
+            for(int y=0; y<n; y++)
+                qmin(g[x][y], g[x][k] + g[k][y]);
+    ll Ans = 1e18;
+    for(int x=0; x<n; x++)
+        for(int y=0; y<n; y++) {
+            if(x == y || g[x][y] == inf) continue;
+            qmin(Ans, f[x][y] * (g[0][x] + g[y][n-1] + 1));
+            for(int k=0; k<n; k++) {
+                if(g[x][k] == inf) continue;
+                qmin(Ans, f[x][y] * (g[x][k] + g[k][0] + g[k][n-1] + 2));
+            }
+        }
+    printf("%lld\n", Ans);
 }
 
 int main() {
