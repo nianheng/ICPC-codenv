@@ -10,39 +10,39 @@ using namespace std;
 typedef pair<int, int> pii;
 typedef array<int, 2> arr;
 
-const ll inf = 1e14;
-
-//const int maxn = ;
+const int maxn = 3e5+100;
 //const ll P = ;
 
-inline void solve() {
-    int n, m; cin >> n >> m;
-    vector<vector<ll> > f(n, vector<ll>(n, inf));
-    vector<vector<ll> > g(n, vector<ll>(n, inf));
-    for(int i=0; i<m; i++) {
-        int x, y; ll z; cin >> x >> y >> z;
-        x--, y--;
-        qmin(f[x][y], z);
-        qmin(f[y][x], z);
-        g[x][y] = g[y][x] = 1;
+int a[maxn];
+int cnt;
+
+arr dfs(int l, int r) {
+    if(l == r) return {a[l], a[r]};
+    int mid = l+r>>1;
+    arr lz = dfs(l, mid);
+    arr rz = dfs(mid+1, r);
+    if(lz[0] == -1 || rz[0] == -1)
+        return {-1, -1};
+    if(lz[1]+1 == rz[0])
+        return {lz[0], rz[1]};
+    if(rz[1]+1 == lz[0]) {
+        cnt++;
+        return {rz[0], lz[1]};
     }
-    for(int x=0; x<n; x++)
-        g[x][x] = 0;
-    for(int k=0; k<n; k++)
-        for(int x=0; x<n; x++)
-            for(int y=0; y<n; y++)
-                qmin(g[x][y], g[x][k] + g[k][y]);
-    ll Ans = 1e18;
-    for(int x=0; x<n; x++)
-        for(int y=0; y<n; y++) {
-            if(x == y || g[x][y] == inf) continue;
-            qmin(Ans, f[x][y] * (g[0][x] + g[y][n-1] + 1));
-            for(int k=0; k<n; k++) {
-                if(g[x][k] == inf) continue;
-                qmin(Ans, f[x][y] * (g[x][k] + g[k][0] + g[k][n-1] + 2));
-            }
-        }
-    printf("%lld\n", Ans);
+    return {-1, -1};
+}
+
+void solve() {
+    int n; cin >> n;
+    for(int i=1; i<=n; i++)
+        cin >> a[i];
+    int mx = 0;
+    while(n >> mx) mx++;
+    cnt = 0;
+    if(dfs(1, n)[0] == -1)
+        printf("-1\n");
+    else
+        printf("%d\n", cnt);
 }
 
 int main() {
