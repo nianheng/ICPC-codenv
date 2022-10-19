@@ -10,7 +10,7 @@ using namespace std;
 typedef pair<int, int> pii;
 typedef array<int, 2> arr;
 
-const int maxn = 2e4+100, maxm = maxn<<1;
+const int maxn = 1e4+100, maxm = maxn<<1;
 //const ll P = ;
 
 int n, m, t, k;
@@ -48,9 +48,6 @@ bool check(int o, int ID) {
 
 void solve() {
     cin >> n >> m;
-    for(int i=1; i<=n; i++)
-        head[i] = 0;
-    num = 1;
     for(int i=1; i<=m; i++) {
         int x, y; cin >> x >> y;
         add(x, y);
@@ -60,7 +57,7 @@ void solve() {
         cin >> id[i];
     cin >> k;
     nc[0] = 1;
-    vector<int> vis(t+1, 0);
+    vector<int> vis(n+1);
     for(int i=1; i<=k; i++)
         cin >> nc[i], vis[nc[i]] = 1, nc[i] = id[nc[i]];
     bfs(0);
@@ -93,7 +90,7 @@ void solve() {
 }
 
 int main() {
-//    freopen("nh.in", "r", stdin);
+    freopen("nh.in", "r", stdin);
     ios::sync_with_stdio(false);
     cin.tie(nullptr);
     int T; cin >> T;
