@@ -1,0 +1,54 @@
+#include <bits/stdc++.h>
+
+using namespace std;
+using ll = long long;
+using ull = unsigned long long;
+using pii = pair<int, int>;
+using arr = array<int, 2>;
+using vi = vector<ll>;
+
+#define qmin(x, y) ((x) = min(x, y))
+#define qmax(x, y) ((x) = max(x, y))
+#define mp(x, y) make_pair(x, y)
+
+const int maxn = 1e3+100;
+const ll P = 998244353;
+
+inline ll poww(ll x, ll y) {
+    ll tmp = 1;
+    while(y) {
+        if(y&1) tmp = tmp*x%P;
+        x = x*x%P;
+    }
+    return tmp;
+}
+
+int n;
+
+int main() {
+    freopen("nh.in", "r", stdin);
+    cin >> n;
+    vi a(n+1), p(n+1);
+    ll iv100 = poww(100, P-2);
+    for(int i=1; i<=n; i++)
+        cin >> a[i] >> p[i], p[i] = p[i]*iv100%P;
+    int m = 1001;
+    vi f(m+1, 0);
+    for(int i=n; i>=1; i--) {
+        vi g(m+1, 0);
+        for(int j=m; j>a[i]; j--)
+            g[i] = (p[i] * f[j-1]%P + (1 - p[i]) * f[j] % P + 1 ) % P;
+        g[a[i]] = f[a[i]] + 1;
+        ll invp = poww(p[i], P-2);
+        for(int j=a[i-1]; j>=0; j--)
+            g[j] = (f[j+1] + invp) % P;
+        f = g;
+    }
+    printf("%lld\n", (f[0] % P + P) % P);
+    return 0;
+}
+
+
+
+
+

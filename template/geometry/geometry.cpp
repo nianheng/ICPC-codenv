@@ -74,6 +74,23 @@ double operator ^ (Vector A, Vector B) {
     return A.x*B.y - A.y*B.x;
 }
 
+//一点一向量表示一条线
+struct Line {
+    Point p;
+    Vector v;
+    Line(Point P = Point(0, 0), Vector V = Vector(0, 0)) {
+        p = P, v = V;
+    }
+};
+
+bool operator != (Point A, Point B) {
+    return dcmp(A.x, B.x)!=0 || dcmp(A.y, B.y)!=0;
+}
+
+bool operator != (Line A, Line B) {
+    return A.p!=B.p || A.v!=B.v;
+}
+
 //长度
 double Length(Vector A) {
     return sqrt(A * A);
@@ -105,6 +122,12 @@ Point Meetpoint(Point p, Vector v, Point q, Vector w) {
     Vector u = p - q;
     double t = (w^u) / (v^w);
     return p + t*v;
+}
+
+Point Meetpoint(Line l1, Line l2) {
+    Vector u = l1.p - l2.p;
+    double t = (l2.v ^ u) / (l1.v ^ l2.v);
+    return l1.p + t * l1.v;
 }
 
 //计算点p到直线AB的距离
@@ -404,23 +427,6 @@ double CirclemeetS(Circle A, Circle B){
     double s2 = r2*r2*t2;
     double s3 = 2*sqrt(p*(p - r1)*(p - r2)*(p - d));
     return s1 + s2 - s3;
-}
-
-//一点一向量表示一条线
-struct Line {
-    Point p;
-    Vector v;
-    Line(Point P = Point(0, 0), Vector V = Vector(0, 0)) {
-        p = P, v = V;
-    }
-};
-
-bool operator != (Point A, Point B) {
-    return dcmp(A.x, B.x)!=0 || dcmp(A.y, B.y)!=0;
-}
-
-bool operator != (Line A, Line B) {
-    return A.p!=B.p || A.v!=B.v;
 }
 
 //给半平面排序，先按照极角，极角相同按照先左再右

@@ -1,0 +1,64 @@
+#include<bits/stdc++.h>
+
+#define mp(x, y) make_pair(x, y)
+#define qmin(x, y) (x = min(x, y))
+#define qmax(x, y) (x = max(x, y))
+
+using ll = long long;
+using namespace std;
+
+typedef pair<int, int> pii;
+typedef array<int, 2> arr;
+
+//const int maxn = ;
+//const ll P = ;
+
+void solve() {
+    int a, b, c, d;
+    cin >> a >> b >> c >> d;
+    vector<int> da, dc;
+    for(int i=1; i*i <= a; i++) {
+        if(a%i) continue;
+        da.push_back(i);
+        if(i*i!=a) da.push_back(a/i);
+    }
+    for(int i=1; i*i <= c; i++) {
+        if(a%i) continue;
+        dc.push_back(i);
+        if(i*i!=c) dc.push_back(c/i);
+    }
+    auto check = [&](ll x, ll L, ll R) {
+        ll d = L / x + 1;
+        if(d * x <= R) return d * x;
+        return 0ll;
+    };
+    for(auto u : da)
+        for(auto v : dc) {
+            ll x = 1ll * u * v;
+            ll y = 1ll * a * c / x;
+            x = check(x, a, b);
+            y = check(y, c, d);
+            if(x && y) {
+                printf("%lld %lld\n", x, y);
+                return;
+            }
+        }
+    printf("-1 -1\n");
+}
+
+int main() {
+    freopen("nh.in", "r", stdin);
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+    int T; cin >> T;
+    while(T--) {
+        solve();
+    }
+    return 0;
+}
+
+
+
+
+
+

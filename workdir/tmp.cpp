@@ -1,107 +1,121 @@
-#include<bits/stdc++.h>
+#include "bits/stdc++.h"
 
-#define mp(x, y) make_pair(x, y)
-#define qmin(x, y) (x = min(x, y))
-#define qmax(x, y) (x = max(x, y))
 
-using ll = long long;
+#define ll          long long
+#define pb          push_back
+#define mp          make_pair
+#define pii         pair<int,int>
+#define vi          vector<int>
+#define all(a)      (a).begin(),(a).end()
+#define F           first
+#define S           second
+#define sz(x)       (int)x.size()
+#define hell        1000000007
+#define endl        '\n'
+#define rep(i,a,b)    for(int i=a;i<b;i++)
 using namespace std;
 
-typedef pair<int, int> pii;
-typedef array<int, 2> arr;
+bool Q;
+struct Line {
+    mutable ll k, m, p;
+    bool operator<(const Line& o) const {
+        return Q ? p < o.p : k < o.k;
+    }
+};
+struct LineContainer : multiset<Line> {
+    const ll inf = LLONG_MAX;
+    ll div(ll a, ll b){
+        return a / b - ((a ^ b) < 0 && a % b);
+    }
+    bool isect(iterator x, iterator y) {
+        if (y == end()) { x->p = inf; return false; }
+        if (x->k == y->k) x->p = x->m > y->m ? inf : -inf;
+        else x->p = div(y->m - x->m, x->k - y->k);
+        return x->p >= y->p;
+    }
+    void add(ll k, ll m) {
+        auto z = insert({k, m, 0}), y = z++, x = y;
+        while (isect(y, z)) z = erase(z);
+        if (x != begin() && isect(--x, y)) isect(x, y = erase(y));
+        while ((y = x) != begin() && (--x)->p >= y->p)
+            isect(x, erase(y));
+    }
+    ll query(ll x) {
+        assert(!empty());
+        Q = 1; auto l = *lower_bound({0,0,x}); Q = 0;
+        return l.k * x + l.m;
+    }
+};
 
-const int maxn = 1e4+100, maxm = maxn<<1;
-//const ll P = ;
-
-int n, m, t, k;
-int f[7][maxn], id[maxn], nc[10];
-int head[maxn], nex[maxm], v[maxm], num = 1;
-
-inline void add(int x, int y) {
-    v[++num] = y, nex[num] = head[x], head[x] = num;
-    v[++num] = x, nex[num] = head[y], head[y] = num;
+vector<int> x,y;
+vector<vi> adj;
+vector<ll> ans;
+vector<int> subsize;
+void dfs1(int u,int v){
+    subsize[u]=1;
+    for(auto i:adj[u]){
+        if(i==v)continue;
+        dfs1(i,u);
+        subsize[u]+=subsize[i];
+    }
 }
 
-void bfs(int s) {
-    queue<int> q;
-    for(int i=1; i<=n; i++)
-        f[s][i] = n+1;
-    f[s][nc[s]] = 0, q.push(nc[s]);
-    while(!q.empty()) {
-        int x = q.front(); q.pop();
-        for(int i=head[x]; i; i=nex[i]) {
-            int y = v[i]; if(f[s][y] != n+1) continue;
-            f[s][y] = f[s][x] + 1, q.push(y);
+void dfs2(int v, int p,LineContainer& cur){
+    int mx=-1,bigChild=-1;
+    bool leaf=1;
+    for(auto u:adj[v]){
+        if(u!=p and subsize[u]>mx){
+            mx=subsize[u];
+            bigChild=u;
+            leaf=0;
         }
     }
-}
-
-bool check(int o, int ID) {
-    vector<int> ds;
-    for(int i=0; i<k; i++)
-        if(o>>i&1) ds.push_back(i+1);
-    int len = 0;
-    for(int i=0; i<ds.size(); i++)
-        len += f[i==0?0:ds[i-1]][nc[ds[i]]];
-    return len + f[ds[ds.size()-1]][ID] == f[0][ID];
-}
-
-void solve() {
-    cin >> n >> m;
-    for(int i=1; i<=m; i++) {
-        int x, y; cin >> x >> y;
-        add(x, y);
+    if(bigChild!=-1){
+        dfs2(bigChild,v,cur);
     }
-    cin >> t;
-    for(int i=1; i<=t; i++)
-        cin >> id[i];
-    cin >> k;
-    nc[0] = 1;
-    vector<int> vis(n+1);
-    for(int i=1; i<=k; i++)
-        cin >> nc[i], vis[nc[i]] = 1, nc[i] = id[nc[i]];
-    bfs(0);
-    sort(nc+1, nc+k+1, [&](int x, int y){return f[0][x] < f[0][y];});
-    for(int i=1; i<=k; i++)
-        bfs(i);
-    int mx = 1 << k;
-    vector<int> ans(mx, 0);
-    ans[0] = 1;
-    for(int i=1; i<=t; i++) {
-        if(vis[i]) continue;
-        vector<int> tmp = ans;
-        for(int o=1; o<mx; o++) {
-            for(int e = o; e; e = e&(e-1)) {
-                if(ans[o^e] == 0 || !check(e, id[i])) continue;
-                tmp[o] = 1; break;
+    for(auto u:adj[v]){
+        if(u!=p and u!=bigChild){
+            LineContainer temp;
+            dfs2(u,v,temp);
+            for(auto i:temp){
+                cur.add(i.k,i.m);
             }
         }
-        ans = tmp;
     }
-    int mn = k;
-    for(int o=0; o<mx; o++) {
-        if(!ans[o]) continue;
-        int tmp = 0;
-        for(int i=0; i<k; i++)
-            if(o>>i&1) tmp++;
-        qmin(mn, k - tmp);
+    if(!leaf)ans[v]=-cur.query(x[v]);
+    else ans[v]=0;
+    cur.add(-y[v],-ans[v]);
+}
+void solve(){
+    int n;
+    cin>>n;
+    x.resize(n+1);
+    y.resize(n+1);
+    ans.resize(n+1);
+    subsize.resize(n+1);
+    adj.resize(n+1);
+    rep(i,1,n+1)cin>>x[i];
+    rep(i,1,n+1)cin>>y[i];
+    rep(i,1,n){
+        int u,v;
+        cin>>u>>v;
+        adj[u].pb(v);
+        adj[v].pb(u);
     }
-    printf("%d\n", mn);
+    dfs1(1,0);
+    LineContainer lc;
+    dfs2(1,0,lc);
+    rep(i,1,n+1)cout<<ans[i]<<" ";
 }
 
-int main() {
-    freopen("nh.in", "r", stdin);
-    ios::sync_with_stdio(false);
-    cin.tie(nullptr);
-    int T; cin >> T;
-    while(T--) {
+int main(){
+    ios_base::sync_with_stdio(false);
+    cin.tie(0);
+    cout.tie(0);
+    int t=1;
+//    cin>>t;
+    while(t--){
         solve();
     }
     return 0;
 }
-
-
-
-
-
-
